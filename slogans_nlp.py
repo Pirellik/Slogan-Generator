@@ -68,7 +68,7 @@ def build_model(maxlen, chars):
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
     return model
 
-def train_network(model, x, y):
+def train_network(model, x, y, p_epochs, progressBar):
     from keras.callbacks import ModelCheckpoint
     filepath = "weights.hdf5"
     checkpoint = ModelCheckpoint(filepath, monitor='loss',
@@ -77,7 +77,8 @@ def train_network(model, x, y):
     from keras.callbacks import ReduceLROnPlateau
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
                                   patience=1, min_lr=0.001)
-    model.fit(x, y, batch_size=128, epochs=5, callbacks=[checkpoint, reduce_lr])
+    model.fit(x, y, batch_size=128, epochs=p_epochs, callbacks=[checkpoint, reduce_lr])
+    progressBar.hide()
 
 
 if __name__ == "__main__":
