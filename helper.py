@@ -18,7 +18,7 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-def generate_text(all_slogans_as_text, maxlen, chars, char_indices, indices_char, length, diversity, end_after_pipe_character = True):
+def generate_text(model, all_slogans_as_text, maxlen, chars, char_indices, indices_char, length, diversity, end_after_pipe_character = True):
     # Get random starting text
     num_pipes = all_slogans_as_text.count('|')
     end_index = random.randint(3, num_pipes)

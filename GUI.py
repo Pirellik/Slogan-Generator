@@ -1,6 +1,7 @@
 from threading import Thread
 import sys
 from slogans_nlp import *
+from helper import *
 from PySide2 import QtWidgets, QtGui
 
 class GUI(QtWidgets.QWidget):
@@ -75,8 +76,8 @@ class GUI(QtWidgets.QWidget):
         self.mainLayout.addWidget(liczbaEpokLabel, 8, 2)
         self.mainLayout.addWidget(self.liczbaEpok, 9, 2)
 
-        self.mainLayout.addWidget(liczbaSloganowLabel, 15, 2)
-        self.mainLayout.addWidget(self.liczbaSloganow, 16, 2)
+        self.mainLayout.addWidget(liczbaSloganowLabel, 16, 2)
+        self.mainLayout.addWidget(self.liczbaSloganow, 17, 2)
 
         self.mainLayout.addWidget(self.trainBt, 10, 2)
         self.mainLayout.addWidget(self.progressBarTrain, 11, 2)
@@ -119,8 +120,9 @@ class GUI(QtWidgets.QWidget):
         step = int(self.krokRamki.text())
         x, y = get_x_and_y(plain_text, max_len, step, chars, char_indices)
         model = build_model(max_len, chars)
-        thread = Thread(target = train_network, args = (model, x, y, int(self.liczbaEpok.text()), self.progressBarTrain))
-        thread.start()
+        train_network(model, x, y, int(self.liczbaEpok.text()), self.progressBarTrain)
+        # thread = Thread(target = train_network, args = (model, x, y, int(self.liczbaEpok.text()), self.progressBarTrain))
+        # thread.start()
 
     def onGenerateBtClicked(self):
         self.setLayout(self.dupa)
@@ -129,7 +131,7 @@ class GUI(QtWidgets.QWidget):
         self.progressBar.setMinimum(0)
         self.progressBar.setValue(0)
         df = read_data_file('input_data.csv')
-        slogan_lengths = get_slogan_lengths(df)
+        slg_lengths = get_slogan_lengths(df)
         all_slogans_as_text = convert_to_plain_text(df)
         chars = get_chars(all_slogans_as_text)
         char_indices, indices_char = get_char_and_indices_dicts(chars)
@@ -144,12 +146,13 @@ class GUI(QtWidgets.QWidget):
         end_after_pipe_character = self.dokladnaDlugosc.isChecked()
         diversity = 0.3
 
-        thread = Thread(target = self.generate, args = (number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, self.progressBar))
-        thread.start()
+        self.generate(model, number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, self.progressBar)
+        # thread = Thread(target = self.generate, args = (number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, self.progressBar))
+        # thread.start()
     
-    def generate(number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, progressBar):
+    def generate(model, number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, progressBar):
         for _ in range(number_of_slogans):
-            print(generate_text(all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character))
+            print(generate_text(model, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character))
         progressBar.hide()
         
 
