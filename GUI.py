@@ -12,8 +12,6 @@ class GUI(QtWidgets.QWidget):
 
         self.mainLayout = QtWidgets.QGridLayout()
 
-        self.dupa = QtWidgets.QGridLayout()
-
         
         self.l = ["Apparel slogans","Automotive slogans","Beauty slogans","Beverage slogans","Business slogans","Construction slogans","Dining slogans","Educational slogans","Financial service slogans","Casino slogans","Computers slogans","Condoms slogans","Magagines slogans","Motorcycle slogans","Newspapers slogans","Pet food slogans","Radio stations slogans","Real estate slogans","Tobacco slogans","Vitamins slogans","Watch slogans"]
         self.lista = []
@@ -125,7 +123,6 @@ class GUI(QtWidgets.QWidget):
         # thread.start()
 
     def onGenerateBtClicked(self):
-        self.setLayout(self.dupa)
         self.progressBar.show()
         self.progressBar.setMaximum(0)
         self.progressBar.setMinimum(0)
