@@ -5,35 +5,7 @@ from keras.layers import Dense, Activation
 from keras.layers import LSTM
 from keras.optimizers import RMSprop
 import random
-
-df = pd.read_csv('input_data.csv', delimiter=';')
-df = df.drop('Unnamed: 4', 1)
-slogan_lengths = [len(elem) for elem in list(df["SLOGAN"])]
-argmin = np.argmin(slogan_lengths)
-argmax = np.argmax(slogan_lengths)
-min_len = slogan_lengths[argmin]
-max_len = slogan_lengths[argmax]
-# df = df[df.CATEGORY == 'Apparel slogans']
-# print(list(df['SLOGAN']))
-all_slogans_as_text = '|'.join(list(df["SLOGAN"]))
-chars = sorted(list(set(all_slogans_as_text)))
-print('total chars: ', len(chars))
-char_indices = dict((c, i) for i, c in enumerate(chars))
-indices_char = dict((i, c) for i, c in enumerate(chars))
-maxlen = int(np.mean(slogan_lengths))
-print('maxlen = ', maxlen)
-
-
-model = Sequential()
-model.add(LSTM(128, input_shape=(maxlen, len(chars))))
-model.add(Dense(len(chars)))
-model.add(Activation('softmax'))
-
-optimizer = RMSprop(lr=0.01)
-
-model.load_weights("weights.hdf5")
-
-model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+from slogans_nlp import read_data_file, get_slogan_lengths, convert_to_plain_text, get_chars, get_char_and_indices_dicts, get_max_len
 
 
 def sample(preds, temperature=1.0):
@@ -46,7 +18,7 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-def generate_text(length, diversity, end_after_pipe_character = True):
+def generate_text(all_slogans_as_text, maxlen, chars, char_indices, indices_char, length, diversity, end_after_pipe_character = True):
     # Get random starting text
     num_pipes = all_slogans_as_text.count('|')
     end_index = random.randint(3, num_pipes)
@@ -59,8 +31,6 @@ def generate_text(length, diversity, end_after_pipe_character = True):
     end_index = list(find(all_slogans_as_text, '|'))[end_index]
 
     sentence = all_slogans_as_text[end_index - maxlen + 1:end_index + 1]
-    # print(sentence)
-    # print('PASKO LEN', len(sentence))
     generated = ''
     for i in range(length):
             x_pred = np.zeros((1, maxlen, len(chars)))
@@ -77,5 +47,29 @@ def generate_text(length, diversity, end_after_pipe_character = True):
             sentence = sentence[1:] + next_char
     return generated
 
-for _ in range(100):
-    print(generate_text(85, 0.2))
+def get_saved_model(maxlen, chars, filepath):
+    model = Sequential()
+    model.add(LSTM(128, input_shape=(maxlen, len(chars))))
+    model.add(Dense(len(chars)))
+    model.add(Activation('softmax'))
+    optimizer = RMSprop(lr=0.01)
+    model.load_weights(filepath)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+    return model
+
+
+if __name__ == "__main__":
+    df = read_data_file('input_data.csv')
+    slogan_lengths = get_slogan_lengths(df)
+    all_slogans_as_text = convert_to_plain_text(df)
+    chars = get_chars(all_slogans_as_text)
+    char_indices, indices_char = get_char_and_indices_dicts(chars)
+    maxlen = get_max_len(True, slogan_lengths)
+    model = get_saved_model(maxlen, chars, "weights.hdf5")
+
+    number_of_slogans = 100
+    max_slogan_length = 50
+    diversity = 0.3
+
+    for _ in range(number_of_slogans):
+        print(generate_text(all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity))
