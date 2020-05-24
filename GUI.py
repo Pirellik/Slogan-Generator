@@ -131,6 +131,11 @@ class GUI(QtWidgets.QWidget):
         self.progressBar.setMinimum(0)
         self.progressBar.setValue(0)
         df = read_data_file('input_data.csv')
+        unwanted = list()
+        for category, checkbox in zip(self.l, self.lista):
+            if not checkbox.isChecked():
+                unwanted.append(category)
+        df = drop_unwanted_categories(df, unwanted)
         slg_lengths = get_slogan_lengths(df)
         all_slogans_as_text = convert_to_plain_text(df)
         chars = get_chars(all_slogans_as_text)
@@ -150,7 +155,7 @@ class GUI(QtWidgets.QWidget):
         # thread = Thread(target = self.generate, args = (number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, self.progressBar))
         # thread.start()
     
-    def generate(model, number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, progressBar):
+    def generate(self, model, number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, progressBar):
         for _ in range(number_of_slogans):
             print(generate_text(model, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character))
         progressBar.hide()
