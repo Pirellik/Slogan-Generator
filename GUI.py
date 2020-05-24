@@ -17,9 +17,9 @@ class GUI(QtWidgets.QWidget):
         self.l = ["Apparel slogans","Automotive slogans","Beauty slogans","Beverage slogans","Business slogans","Construction slogans","Dining slogans","Educational slogans","Financial service slogans","Casino slogans","Computers slogans","Condoms slogans","Magagines slogans","Motorcycle slogans","Newspapers slogans","Pet food slogans","Radio stations slogans","Real estate slogans","Tobacco slogans","Vitamins slogans","Watch slogans"]
         self.lista = []
 
-        for i in range(len(l)):
-            self.lista.append(QtWidgets.QCheckBox(l[i]))
-            self.mainLayout.addWidget(lista[i], i + 1, 0)
+        for i in range(len(self.l)):
+            self.lista.append(QtWidgets.QCheckBox(self.l[i]))
+            self.mainLayout.addWidget(self.lista[i], i + 1, 0)
 
         wyborKategoriLabel = QtWidgets.QLabel("Wybierz kategorie")
 
@@ -57,8 +57,8 @@ class GUI(QtWidgets.QWidget):
         self.progressBar = QtWidgets.QProgressBar(self)
 
 
-        dlugoscWektora.setValidator(QtGui.QIntValidator())
-        krokRamki.setValidator(QtGui.QIntValidator())
+        self.dlugoscWektora.setValidator(QtGui.QIntValidator())
+        self.krokRamki.setValidator(QtGui.QIntValidator())
         self.liczbaEpok.setValidator(QtGui.QIntValidator())
 
         self.mainLayout.addWidget(wyborKategoriLabel, 0, 0)
@@ -114,12 +114,12 @@ class GUI(QtWidgets.QWidget):
         if self.srednia.isChecked:
             max_len = get_max_len(True, slg_lengths)
         else:
-            max_len = get_max_len(False, slg_lengths, int(self.dlugoscWektora.text)
+            max_len = get_max_len(False, slg_lengths, int(self.dlugoscWektora.text()))
 
-        step = int(self.krokRamki.text)
+        step = int(self.krokRamki.text())
         x, y = get_x_and_y(plain_text, max_len, step, chars, char_indices)
         model = build_model(max_len, chars)
-        thread = Thread(target = train_network, args = (model, x, y, int(self.liczbaEpok.text), self.progressBarTrain)
+        thread = Thread(target = train_network, args = (model, x, y, int(self.liczbaEpok.text()), self.progressBarTrain))
         thread.start()
 
     def onGenerateBtClicked(self):
@@ -136,16 +136,21 @@ class GUI(QtWidgets.QWidget):
         if self.srednia.isChecked:
             maxlen = get_max_len(True, slg_lengths)
         else:
-            maxlen = get_max_len(False, slg_lengths, int(self.dlugoscWektora.text)
+            maxlen = get_max_len(False, slg_lengths, int(self.dlugoscWektora.text()))
         model = get_saved_model(maxlen, chars, "weights.hdf5")
 
-        number_of_slogans = int(self.liczbaSloganow.text)
-        max_slogan_length = int(self.dlugosc.text)
+        number_of_slogans = int(self.liczbaSloganow.text())
+        max_slogan_length = int(self.dlugosc.text())
         end_after_pipe_character = self.dokladnaDlugosc.isChecked()
         diversity = 0.3
 
+        thread = Thread(target = self.generate, args = (number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, self.progressBar))
+        thread.start()
+    
+    def generate(number_of_slogans, all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character, progressBar):
         for _ in range(number_of_slogans):
             print(generate_text(all_slogans_as_text, maxlen, chars, char_indices, indices_char, max_slogan_length, diversity, end_after_pipe_character))
+        progressBar.hide()
         
 
 

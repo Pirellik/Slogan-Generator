@@ -18,7 +18,7 @@ def read_data_file(filepath):
 
 def drop_unwanted_categories(dataframe, unwanted_categories):
     for cat in unwanted_categories:
-        dataframe = dataframe[df["CATEGORY"] != cat]
+        dataframe = dataframe[dataframe["CATEGORY"] != cat]
     return dataframe
 
 def convert_to_plain_text(dataframe):
